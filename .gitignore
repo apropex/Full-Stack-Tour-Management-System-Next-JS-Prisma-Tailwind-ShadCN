@@ -43,5 +43,6 @@ next-env.d.ts
 /src/generated/prisma
 
 
-note.txt
-note
+/note
+/note/*
+/note.txt
