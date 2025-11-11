@@ -1,0 +1,39 @@
+//
+
+enum UserRoles {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  USER
+  GUIDE
+}
+
+enum AuthProvider {
+  google
+  facebook
+  credentials
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  HAHA
+  WOW
+  SAD
+  ANGRY
+}
+
+enum BookingStatus {
+  PENDING
+  CANCELED
+  COMPLETED
+  FAILED
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  CANCELED
+  FAILED
+  REFUNDED
+}

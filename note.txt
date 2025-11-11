@@ -1,0 +1,302 @@
+
+bun add -D prettier-plugin-prisma
+
+
+bun add -D prisma@latest
+bun add @prisma/client@latest
+bunx prisma init
+
+bunx prisma migrate dev --name init
+bunx prisma generate
+
+bunx prisma migrate reset
+
+
+
+touch review.routes.ts review.controller.ts review.service.ts review.validation.ts review.interface.ts review.constants.ts 
+
+
+
+
+
+stripe listen --forward-to localhost:5000/webhook
+
+
+
+
+
+
+
+
+পরবর্তী ধাপ (Optional but Recommended)
+উন্নতি                      কীভাবে
+
+Image Model                Image { id, url, tourId, alt }
+Redis Cache                tour:slug:views, reaction:counts
+Rate Limiting              Like/comment per minute
+Audit Log                  ReactionLog, CommentEdit
+Search with Meilisearch    Better than DB fulltext
+
+
+
+
+// schema/enum.prisma
+enum UserRoles {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  USER
+  GUIDE
+}
+
+enum AuthProvider {
+  google
+  facebook
+  credentials
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  HAHA
+  WOW
+  SAD
+  ANGRY
+}
+
+enum BookingStatus {
+  PENDING
+  CANCELED
+  COMPLETED
+  FAILED
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  CANCELED
+  FAILED
+  REFUNDED
+}
+
+
+// schema/user.prisma
+model User {
+  id         String       @id @default(cuid())
+  email      String       @unique
+  password   String?
+  role       UserRoles    @default(USER)
+  name       String
+  phone      String?
+  avatar     String?
+  street     String?
+  city       String?
+  state      String?
+  ZIP        String?
+  isDeleted  Boolean      @default(false)
+  isActive   Boolean      @default(false)
+  isBlocked  Boolean      @default(false)
+  isVerified Boolean      @default(false)
+  provider   AuthProvider @default(credentials)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours     Tour[]     @relation("TourAuthor")
+  comments  Comment[]  @relation("UserComments")
+  replies   Reply[]    @relation("UserReplies")
+  reactions Reaction[] @relation("UserReactions")
+  bookings Booking[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isDeleted])
+  @@index([isActive])
+}
+
+// schema/tour-post.prisma
+model TourType {
+  id   String @id @default(cuid())
+  name String @unique
+
+  tours Tour[] @relation("TourTypeTours")
+
+  @@index([name])
+}
+
+model Tour {
+  id                String   @id @default(cuid())
+  title             String
+  slug              String   @unique
+  description       String   @default("") @db.Text
+  images            String[] // TODO: Later replace with Image model
+  location          String   @default("")
+  departureLocation String   @default("")
+  arrivalLocation   String   @default("")
+  cost              Int
+  startDate         DateTime
+  endDate           DateTime
+  included          String[]
+  excluded          String[]
+  amenities         String[]
+  tourPlane         String[]
+  maxGuest          Int      @default(0)
+  minAge            Int      @default(15)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  authorId String
+  author   User   @relation("TourAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  tourTypeId String
+  tourType   TourType @relation("TourTypeTours", fields: [tourTypeId], references: [id], onDelete: Restrict)
+
+  divisionId String
+  division   Division @relation("DivisionTours", fields: [divisionId], references: [id], onDelete: Restrict)
+
+  // Reactions & Comments
+  reactions Reaction[] @relation("TourReactions")
+  comments  Comment[]  @relation("TourComments")
+  bookings  Booking[]
+
+  // Denormalized Counts (Fast UI)
+  likeCount  Int @default(0)
+  loveCount  Int @default(0)
+  hahaCount  Int @default(0)
+  wowCount   Int @default(0)
+  sadCount   Int @default(0)
+  angryCount Int @default(0)
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([tourTypeId])
+  @@index([divisionId])
+  @@index([startDate])
+  @@index([cost])
+}
+
+
+// schema/tour-comment.prisma
+model Comment {
+  id        String  @id @default(cuid())
+  content   String  @db.Text
+  isHidden  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  tourId String
+  tour   Tour   @relation("TourComments", fields: [tourId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // For reply-to-reply
+  parentId String?
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replies Reply[] @relation("CommentReplies")
+
+  @@index([tourId, createdAt])
+  @@index([authorId])
+  @@index([isDeleted, isHidden])
+  @@index([parentId])
+}
+
+model Reply {
+  id        String  @id @default(cuid())
+  content   String  @db.Text
+  isHidden  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  commentId String
+  comment   Comment @relation("CommentReplies", fields: [commentId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("UserReplies", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Optional: reply to another reply
+  parentId String?
+  parent   Reply?  @relation("ReplyToReply", fields: [parentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replies Reply[] @relation("ReplyToReply")
+
+  @@index([commentId, createdAt])
+  @@index([authorId])
+  @@index([isDeleted, isHidden])
+  @@index([parentId])
+}
+
+// schema/tour-reaction.prisma
+model Reaction {
+  tourId String
+  tour   Tour         @relation("TourReactions", fields: [tourId], references: [id], onDelete: Cascade)
+  userId String
+  user   User         @relation("UserReactions", fields: [userId], references: [id], onDelete: Cascade)
+  type   ReactionType @default(LIKE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([tourId, userId])
+  @@index([tourId])
+  @@index([userId])
+  @@index([tourId, type])
+}
+
+// schema/division.prisma
+model Division {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  thumbnail   String?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours Tour[] @relation("DivisionTours")
+
+  @@index([slug])
+  @@index([name])
+}
+
+// schema/booking.prisma
+model Booking {
+  id     String        @id @default(cuid())
+  guest  Int
+  status BookingStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id])
+
+  payment Payment[]
+
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  TrxId       String
+  amount      Int
+  paymentInfo Json
+  invoiceUrl  String?
+  status      PaymentStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+}
