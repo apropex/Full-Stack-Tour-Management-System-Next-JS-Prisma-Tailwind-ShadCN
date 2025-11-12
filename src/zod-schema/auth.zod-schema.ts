@@ -1,5 +1,6 @@
 //
 
+import { Gender } from "@prisma/client";
 import z from "zod";
 
 export const loginZodSchema = z.object({
@@ -18,6 +19,7 @@ export const registerZodSchema = z.object({
     .string({ error: "Phone must be string type" })
     .trim()
     .min(10, "Enter a valid phone number"),
+  gender: z.enum(Object.values(Gender), "Enter a valid gender"),
   street: z.string({ error: "Street must be string type" }).optional(),
   city: z.string({ error: "City must be string type" }).optional(),
   state: z.string({ error: "State must be string type" }).optional(),

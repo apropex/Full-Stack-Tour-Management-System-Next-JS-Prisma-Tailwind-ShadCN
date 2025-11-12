@@ -6,6 +6,7 @@ model User {
   password   String?
   role       UserRoles    @default(USER)
   name       String
+  gender     Gender       @default(MALE)
   phone      String?
   avatar     String?
   street     String?
