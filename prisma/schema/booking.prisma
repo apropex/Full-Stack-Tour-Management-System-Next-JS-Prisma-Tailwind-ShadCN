@@ -1,0 +1,33 @@
+//
+
+model Booking {
+  id     String        @id @default(cuid())
+  guest  Int
+  status BookingStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tourId String
+  tour   Tour   @relation(fields: [tourId], references: [id])
+
+  payment Payment[]
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  TrxId       String
+  amount      Int
+  paymentInfo Json
+  invoiceUrl  String?
+  status      PaymentStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+}

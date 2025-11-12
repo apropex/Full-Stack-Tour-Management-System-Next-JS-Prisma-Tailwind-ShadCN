@@ -103,7 +103,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const newUser = await register({
             name: user.name || profile?.name,
-            email: user.email || profile?.email || "",
+            email: user.email || profile?.email,
             role: "USER",
             avatar: user.avatar || profile?.picture,
             provider: account.provider,

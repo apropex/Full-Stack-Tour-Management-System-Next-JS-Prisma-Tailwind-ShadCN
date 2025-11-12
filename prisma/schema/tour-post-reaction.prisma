@@ -1,0 +1,17 @@
+//
+
+model Reaction {
+  tourId String
+  tour   Tour         @relation("TourReactions", fields: [tourId], references: [id], onDelete: Cascade)
+  userId String
+  user   User         @relation("UserReactions", fields: [userId], references: [id], onDelete: Cascade)
+  type   ReactionType @default(LIKE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([tourId, userId])
+  @@index([tourId])
+  @@index([userId])
+  @@index([tourId, type])
+}

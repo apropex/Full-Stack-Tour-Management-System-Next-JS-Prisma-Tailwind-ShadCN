@@ -1,0 +1,48 @@
+//
+
+model Comment {
+  id        String  @id @default(cuid())
+  content   String  @db.Text
+  isHidden  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  tourId String
+  tour   Tour   @relation("TourComments", fields: [tourId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+
+  replies Reply[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tourId, createdAt])
+  @@index([authorId])
+  @@index([isDeleted, isHidden])
+}
+
+model Reply {
+  id        String  @id @default(cuid())
+  content   String  @db.Text
+  isHidden  Boolean @default(false)
+  isDeleted Boolean @default(false)
+
+  commentId String
+  comment   Comment @relation("CommentReplies", fields: [commentId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation("UserReplies", fields: [authorId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   Reply?  @relation("ReplyToReply", fields: [parentId], references: [id])
+  replies  Reply[] @relation("ReplyToReply")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([commentId, createdAt])
+  @@index([authorId])
+  @@index([isDeleted, isHidden])
+  @@index([parentId])
+}

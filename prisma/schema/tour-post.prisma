@@ -1,0 +1,63 @@
+//
+
+model TourType {
+  id   String @id @default(cuid())
+  name String @unique
+
+  tours Tour[] @relation("TourTypeTours")
+
+  @@index([name])
+}
+
+model Tour {
+  id                String   @id @default(cuid())
+  title             String
+  slug              String   @unique
+  description       String   @default("") @db.Text
+  images            String[] // TODO: Later replace with Image model
+  location          String   @default("")
+  departureLocation String   @default("")
+  arrivalLocation   String   @default("")
+  cost              Int
+  startDate         DateTime
+  endDate           DateTime
+  included          String[]
+  excluded          String[]
+  amenities         String[]
+  tourPlane         String[]
+  maxGuest          Int      @default(0)
+  minAge            Int      @default(15)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  authorId String
+  author   User   @relation("TourAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  tourTypeId String
+  tourType   TourType @relation("TourTypeTours", fields: [tourTypeId], references: [id], onDelete: Restrict)
+
+  divisionId String
+  division   Division @relation("DivisionTours", fields: [divisionId], references: [id], onDelete: Restrict)
+
+  // Reactions & Comments
+  reactions Reaction[] @relation("TourReactions")
+  comments  Comment[]  @relation("TourComments")
+  bookings  Booking[]
+
+  // Denormalized Counts (Fast UI)
+  likeCount  Int @default(0)
+  loveCount  Int @default(0)
+  hahaCount  Int @default(0)
+  wowCount   Int @default(0)
+  sadCount   Int @default(0)
+  angryCount Int @default(0)
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([tourTypeId])
+  @@index([divisionId])
+  @@index([startDate])
+  @@index([cost])
+}
