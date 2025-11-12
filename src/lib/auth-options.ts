@@ -1,4 +1,12 @@
-import { Account, NextAuthOptions, Profile, User } from "next-auth";
+import { login } from "@/services/auth/auth.login";
+import { register } from "@/services/auth/auth.register";
+import { env } from "@/utils/env";
+import {
+  Account,
+  NextAuthOptions,
+  User as NextAuthUser,
+  Profile,
+} from "next-auth";
 import { AdapterUser } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -6,8 +14,8 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: env("GOOGLE_CLIENT_ID"),
+      clientSecret: env("GOOGLE_CLIENT_SECRET"),
     }),
 
     CredentialsProvider({
@@ -18,7 +26,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials) {
+      async authorize(credentials): Promise<NextAuthUser | null> {
         const { email, password } = credentials as Record<
           "email" | "password",
           string
@@ -95,24 +103,41 @@ export const authOptions: NextAuthOptions = {
       account,
       profile,
     }: {
-      user: User | AdapterUser;
+      user: NextAuthUser | AdapterUser;
       account: Account | null;
       profile?: (Profile & { picture?: string }) | undefined;
     }) {
       if (account?.provider === "google") {
         try {
-          const newUser = await register({
-            name: user.name || profile?.name,
-            email: user.email || profile?.email,
-            role: "USER",
-            avatar: user.avatar || profile?.picture,
-            provider: account.provider,
-            providerId: account.providerAccountId,
-            isVerified: true,
-          });
+          const newUser = await register(
+            {
+              name: profile?.name || user.name,
+              email: profile?.email || user.email,
+              avatar: profile?.picture || user.avatar,
+              provider: account.provider,
+              providerId: account.providerAccountId,
+              isVerified: true,
+            },
+            true,
+          );
 
           if (newUser && (newUser.id || newUser.email)) {
+            const address = {
+              street: newUser.street,
+              city: newUser.city,
+              state: newUser.state,
+              zip: newUser.zip,
+            };
+
             user.id = newUser.id;
+            user.email = newUser.email;
+            user.role = newUser.role;
+            user.name = newUser.name;
+            user.avatar = newUser.avatar as string;
+            user.isVerified = newUser.isVerified;
+            user.provider = newUser.provider;
+            user.phone = newUser.phone;
+            user.address = address;
             return true;
           }
           return false;
@@ -133,7 +158,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
 
-  secret: process.env.NEXT_AUTH_SECRET ?? "",
+  secret: env("NEXT_AUTH_SECRET"),
 
   pages: {
     signIn: "/signin",
