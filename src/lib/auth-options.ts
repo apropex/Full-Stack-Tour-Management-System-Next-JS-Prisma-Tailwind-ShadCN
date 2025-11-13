@@ -1,6 +1,6 @@
+import { ENV } from "@/lib/config/env";
 import { login } from "@/services/auth/auth.login";
 import { register } from "@/services/auth/auth.register";
-import { env } from "@/utils/env";
 import {
   Account,
   NextAuthOptions,
@@ -14,8 +14,8 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: env("GOOGLE_CLIENT_ID"),
-      clientSecret: env("GOOGLE_CLIENT_SECRET"),
+      clientId: ENV.GOOGLE_CLIENT_ID,
+      clientSecret: ENV.GOOGLE_CLIENT_SECRET,
     }),
 
     CredentialsProvider({
@@ -158,7 +158,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
 
-  secret: env("NEXT_AUTH_SECRET"),
+  secret: ENV.NEXT_AUTH_SECRET,
 
   pages: {
     signIn: "/signin",

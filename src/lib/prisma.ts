@@ -1,4 +1,4 @@
-import { env } from "@/utils/env";
+import { ENV, isProd } from "@/lib/config/env";
 import { PrismaClient } from "@prisma/client";
 
 declare global {
@@ -10,9 +10,9 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    datasources: { db: { url: env("DATABASE_URL") } },
+    datasources: { db: { url: ENV.DATABASE_URL } },
   });
 
-if (env("NODE_ENV") !== "production") globalForPrisma.prisma = prisma;
+if (!isProd) globalForPrisma.prisma = prisma;
 
 export default prisma;

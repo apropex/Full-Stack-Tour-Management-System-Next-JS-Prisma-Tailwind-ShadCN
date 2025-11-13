@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// lib/errors/ApiError.ts
-
 export interface AppErrorOptions {
   code?: string;
   statusCode?: number;

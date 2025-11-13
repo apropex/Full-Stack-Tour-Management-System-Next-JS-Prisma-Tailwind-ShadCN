@@ -1,9 +1,9 @@
+import { ENV } from "@/lib/config/env";
 import { compare, genSalt, hash } from "bcryptjs";
-import { env } from "./env";
 
 export const bcrypt = {
   buildHash: async (password: string): Promise<string> => {
-    const saltValue = Number(env("BCRYPT_SALT_VALUE"));
+    const saltValue = ENV.BCRYPT_SALT_ROUND;
 
     if (!saltValue) return "";
 

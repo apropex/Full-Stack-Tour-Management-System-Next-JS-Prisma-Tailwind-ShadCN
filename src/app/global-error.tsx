@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { isProd } from "@/lib/config/env";
 import { captureException } from "@sentry/nextjs";
 import { AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
@@ -107,7 +108,7 @@ export default function GlobalError({ error }: GlobalErrorProps) {
                 seconds...
               </p>
 
-              {process.env.NODE_ENV === "development" && (
+              {!isProd && (
                 <details className="mt-4 bg-muted p-3 rounded-md text-left text-xs">
                   <summary className="cursor-pointer text-gray-600 dark:text-gray-300 font-mono">
                     Debug Info

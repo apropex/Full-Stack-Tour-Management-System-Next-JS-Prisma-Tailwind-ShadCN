@@ -1,6 +1,6 @@
 import "dotenv/config";
 import path from "node:path";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   // to support the multiple schema, keep the folder path only
@@ -10,6 +10,6 @@ export default defineConfig({
   },
   engine: "classic",
   datasource: {
-    url: env("DATABASE_URL"),
+    url: process.env.DATABASE_URL || "",
   },
 });

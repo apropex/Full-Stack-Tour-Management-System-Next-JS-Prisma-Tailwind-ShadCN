@@ -1,5 +1,6 @@
 // sentry.server.config.ts //* root path
 import * as Sentry from "@sentry/nextjs";
+import "dotenv/config";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,

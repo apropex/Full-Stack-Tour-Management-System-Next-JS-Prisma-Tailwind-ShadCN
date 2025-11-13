@@ -2,10 +2,10 @@
 
 // lib/errors/handleError.ts
 
-import { isProd } from "@/config/env";
+import { isProd } from "@/lib/config/env";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { AppError } from "./ApiError";
+import { AppError } from "./AppError";
 import { logError } from "./logger";
 
 type ErrorResponse = {

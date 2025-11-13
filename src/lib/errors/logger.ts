@@ -2,7 +2,7 @@
 
 // lib/errors/logger.ts
 
-import { isProd } from "@/config/env";
+import { isProd } from "@/lib/config/env";
 import * as Sentry from "@sentry/nextjs";
 import fs from "fs";
 import path from "path";
