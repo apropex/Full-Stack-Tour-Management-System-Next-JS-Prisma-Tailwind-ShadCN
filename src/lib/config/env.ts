@@ -24,10 +24,12 @@ interface EnvConfig {
   };
 
   REDIS: {
+    REDIS_URL: string;
     REDIS_USERNAME: string;
     REDIS_PASS: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    AUTO_CONNECT_REDIS: string;
   };
 }
 
@@ -52,10 +54,12 @@ const rawEnv = {
   RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
 
   REDIS: {
+    REDIS_URL: process.env.REDIS_URL,
     REDIS_USERNAME: process.env.REDIS_USERNAME,
     REDIS_PASS: process.env.REDIS_PASS,
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: process.env.REDIS_PORT,
+    AUTO_CONNECT_REDIS: process.env.AUTO_CONNECT_REDIS,
   },
 } as const;
 
@@ -93,10 +97,12 @@ export const ENV = (() => {
     },
 
     REDIS: {
+      REDIS_URL: process.env.REDIS_URL!,
       REDIS_USERNAME: process.env.REDIS_USERNAME!,
       REDIS_PASS: process.env.REDIS_PASS!,
       REDIS_HOST: process.env.REDIS_HOST!,
       REDIS_PORT: Number(process.env.REDIS_PORT!),
+      AUTO_CONNECT_REDIS: process.env.AUTO_CONNECT_REDIS!,
     },
   } as Readonly<EnvConfig>;
 })();
