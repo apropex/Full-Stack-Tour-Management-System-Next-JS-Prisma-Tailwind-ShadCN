@@ -6,7 +6,6 @@ import { AppError } from "@/lib/errors/AppError";
 import { logError } from "@/lib/errors/logger";
 import prisma from "@/lib/prisma";
 import { bcrypt } from "@/utils/bcrypt";
-import { statusCode } from "@/utils/status-code";
 import {
   ChangePasswordZodSchema_server,
   iChangePasswordZodSchema_server,
@@ -19,15 +18,12 @@ export const changePassword = async (data: iChangePasswordZodSchema_server) => {
 
     const id = await getUserServer("id");
 
-    if (!id)
-      throw new AppError("Unauthorized user or token not found", {
-        statusCode: statusCode.UNAUTHORIZED,
-      });
+    if (!id) throw new AppError(401, "Unauthorized user or token not found");
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id } });
 
     const isValidPass = await bcrypt.compare(oldPassword, user.password || "");
-    if (!isValidPass) throw new AppError("Invalid old password");
+    if (!isValidPass) throw new AppError(400, "Invalid old password");
 
     const hashedNewPass = await bcrypt.buildHash(newPassword);
 

@@ -14,10 +14,10 @@ export class AppError extends Error {
   public readonly isOperational: boolean;
 
   constructor(
+    statusCode: number,
     message: string,
     {
       code = "INTERNAL_ERROR",
-      statusCode = 500,
       context,
       isOperational = true,
     }: AppErrorOptions = {},

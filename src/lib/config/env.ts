@@ -18,12 +18,9 @@ interface EnvConfig {
 
   SENTRY_DSN: string;
 
-  NODEMAILER: {
-    SMTP_HOST: string;
-    SMTP_PORT: number;
-    SMTP_USER: string;
-    SMTP_FROM: string;
-    SMTP_PASS: string;
+  RESEND: {
+    API_KEY: string;
+    FROM: string;
   };
 
   REDIS: {
@@ -51,13 +48,8 @@ const rawEnv = {
 
   SENTRY_DSN: process.env.SENTRY_DSN,
 
-  NODEMAILER: {
-    SMTP_HOST: process.env.SMTP_HOST,
-    SMTP_PORT: process.env.SMTP_PORT,
-    SMTP_USER: process.env.SMTP_USER,
-    SMTP_FROM: process.env.SMTP_FROM,
-    SMTP_PASS: process.env.SMTP_PASS,
-  },
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
 
   REDIS: {
     REDIS_USERNAME: process.env.REDIS_USERNAME,
@@ -95,12 +87,9 @@ export const ENV = (() => {
 
     SENTRY_DSN: process.env.SENTRY_DSN!,
 
-    NODEMAILER: {
-      SMTP_HOST: process.env.SMTP_HOST!,
-      SMTP_PORT: Number(process.env.SMTP_PORT!),
-      SMTP_USER: process.env.SMTP_USER!,
-      SMTP_FROM: process.env.SMTP_FROM!,
-      SMTP_PASS: process.env.SMTP_PASS!,
+    RESEND: {
+      API_KEY: process.env.RESEND_API_KEY!,
+      FROM: process.env.RESEND_FROM_EMAIL!,
     },
 
     REDIS: {

@@ -18,7 +18,7 @@ export function envChecker<T extends Record<string, any>>(
     if (value === undefined || value === null || value === "") {
       const errorMessage = `Environment variable "${fullKey}" is missing or empty.`;
       console.error("❌", errorMessage);
-      throw new AppError(errorMessage, {
+      throw new AppError(404, errorMessage, {
         code: "ENV_MISSING",
         statusCode: 500,
         context: { key: fullKey },
@@ -28,9 +28,8 @@ export function envChecker<T extends Record<string, any>>(
     // Validate numbers
     if (key.includes("PORT") || key.includes("ROUND")) {
       if (isNaN(Number(value))) {
-        throw new AppError(`"${fullKey}" must be a valid number.`, {
+        throw new AppError(500, `"${fullKey}" must be a valid number.`, {
           code: "ENV_INVALID_NUMBER",
-          statusCode: 500,
         });
       }
     }
