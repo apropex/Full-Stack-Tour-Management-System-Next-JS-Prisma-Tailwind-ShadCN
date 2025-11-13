@@ -9,6 +9,7 @@ model User {
   gender     Gender       @default(MALE)
   phone      String?
   avatar     String?
+  dob        DateTime?
   street     String?
   city       String?
   state      String?

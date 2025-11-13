@@ -3,7 +3,7 @@
 import { uploadToCloudinary } from "@/lib/cloudinary/uploadToCloudinary";
 import prisma from "@/lib/prisma";
 import { throwError } from "@/utils/throwError";
-import { registerZodSchema } from "@/zod-schema/auth.zod-schema";
+import { registerZodSchema_server } from "@/zod-schema/auth/auth.register.zod-schema";
 import { Prisma } from "@prisma/client";
 
 export const register = async (
@@ -30,7 +30,7 @@ export const register = async (
 
       if (!file) throwError("Avatar is required");
 
-      const safeValues = await registerZodSchema.parseAsync(values);
+      const safeValues = await registerZodSchema_server.parseAsync(values);
 
       return prisma.$transaction(async (trx) => {
         const [uploaded] = await uploadToCloudinary(file, {
@@ -43,9 +43,10 @@ export const register = async (
 
         return await trx.user.create({
           data: {
-            ...safeValues,
+            ...(safeValues as Prisma.UserCreateInput),
             avatar: uploaded.secure_url,
           },
+          omit: { password: true },
         });
       });
 

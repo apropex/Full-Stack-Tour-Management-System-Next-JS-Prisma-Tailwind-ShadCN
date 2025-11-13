@@ -6,7 +6,7 @@ import { throwError } from "@/utils/throwError";
 import {
   iLoginCredentials,
   loginZodSchema,
-} from "@/zod-schema/auth.zod-schema";
+} from "@/zod-schema/auth/auth.login.zod-schema";
 import { User } from "@prisma/client";
 
 export const login = async (credentials: iLoginCredentials): Promise<User> => {
