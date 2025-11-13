@@ -5,7 +5,10 @@ import {
   getDefaultDashboardRoute,
   isAuthRoute,
   isProtectedRoute,
+  isPublicRoute,
 } from "./utils/proxy/proxy.helpers";
+
+const unauthorized = "/unauthorized";
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -18,21 +21,37 @@ export default async function proxy(request: NextRequest) {
 
   // ========================== //
 
-  const role: UserRoles | null = (await getUserServer())?.role || null;
+  const user = await getUserServer();
+  const role: UserRoles | null = user?.role || null;
+  const isVerified: boolean | null = user?.isVerified ?? null;
 
-  if (isAuthRoute(pathname) && role) {
+  if (isAuthRoute(pathname) && pathname !== "/email-verify" && role) {
     return redirect(getDefaultDashboardRoute(role));
   }
 
+  if (pathname === "/email-verify" && isVerified) {
+    return redirect(getDefaultDashboardRoute(role as UserRoles));
+  }
+
   if (role === "USER" && pathname.startsWith("/dashboard")) {
-    return redirect("/unauthorized");
+    return redirect(unauthorized);
   }
 
   if (isProtectedRoute(pathname) && !role) {
     return redirect("/login");
   }
 
-  NextResponse.next();
+  if (isProtectedRoute(pathname) && role) {
+    if (!isVerified) {
+      const verifyUrl = new URL("/email-verify", request.url);
+      verifyUrl.searchParams.set("email", user?.email || "");
+      return NextResponse.redirect(verifyUrl);
+    }
+  }
+
+  if (isPublicRoute(pathname)) return NextResponse.next();
+
+  return redirect("/");
 }
 
 //

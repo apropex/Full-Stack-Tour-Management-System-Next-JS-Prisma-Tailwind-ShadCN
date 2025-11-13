@@ -7,11 +7,21 @@ export interface RouteConfig {
   patterns: RegExp[];
 }
 
-export const auth_routes = ["/login", "/register", "/forgot-password"];
+export const auth_routes = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/email-verify",
+];
 
 export const protected_routes: RouteConfig = {
-  paths: ["/my-profile"],
-  patterns: [/^\/settings(\/|$)/],
+  paths: ["/my-profile", "/complaint", "/review"],
+  patterns: [/^\/settings(\/|$)/, /^\/bookings(\/|$)/, /^\/payments(\/|$)/],
+};
+
+export const public_routes: RouteConfig = {
+  paths: ["/", "/about", "/support", "/unauthorized"],
+  patterns: [/^\/tour(\/|$)/],
 };
 
 export const isAuthRoute = (path: string): boolean => {
@@ -21,6 +31,12 @@ export const isAuthRoute = (path: string): boolean => {
 export const isProtectedRoute = (path: string): boolean => {
   const paths = protected_routes.paths.includes(path);
   const pattern = protected_routes.patterns.some((regex) => regex.test(path));
+  return paths || pattern || false;
+};
+
+export const isPublicRoute = (path: string): boolean => {
+  const paths = public_routes.paths.includes(path);
+  const pattern = public_routes.patterns.some((regex) => regex.test(path));
   return paths || pattern || false;
 };
 

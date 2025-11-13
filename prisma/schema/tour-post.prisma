@@ -19,6 +19,9 @@ model Tour {
   departureLocation String   @default("")
   arrivalLocation   String   @default("")
   cost              Int
+  discountCost      Int      @default(0)
+  capacity          Int
+  fulfil            Int      @default(0)
   startDate         DateTime
   endDate           DateTime
   included          String[]
@@ -45,6 +48,7 @@ model Tour {
   reactions Reaction[] @relation("TourReactions")
   comments  Comment[]  @relation("TourComments")
   bookings  Booking[]
+  reviews   Review[]
 
   // Denormalized Counts (Fast UI)
   likeCount  Int @default(0)

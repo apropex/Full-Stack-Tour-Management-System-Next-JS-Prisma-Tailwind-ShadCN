@@ -28,6 +28,7 @@ model User {
   replies   Reply[]    @relation("UserReplies")
   reactions Reaction[] @relation("UserReactions")
   bookings  Booking[]
+  reviews   Review[]
 
   @@index([email])
   @@index([role])
