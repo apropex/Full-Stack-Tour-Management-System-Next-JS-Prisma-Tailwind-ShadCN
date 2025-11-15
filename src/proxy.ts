@@ -3,12 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserServer } from "./helper/getUserServer";
 import {
   getDefaultDashboardRoute,
+  getRouteOwner,
   isAuthRoute,
-  isProtectedRoute,
-  isPublicRoute,
+  isEmailVerifyRoute,
+  isPermittedToAdminDashboard,
 } from "./utils/proxy/proxy.helpers";
-
-const unauthorized = "/unauthorized";
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -25,33 +24,34 @@ export default async function proxy(request: NextRequest) {
   const role: UserRoles | null = user?.role || null;
   const isVerified: boolean | null = user?.isVerified ?? null;
 
-  if (isAuthRoute(pathname) && pathname !== "/email-verify" && role) {
+  const owner = getRouteOwner(pathname);
+
+  if (owner === null) return redirect("/");
+
+  if (owner === "PUBLIC" || role === "SUPER_ADMIN") {
+    return NextResponse.next();
+  }
+
+  if (isAuthRoute(pathname) && !isEmailVerifyRoute(pathname) && role) {
     return redirect(getDefaultDashboardRoute(role));
   }
 
-  if (pathname === "/email-verify" && isVerified) {
-    return redirect(getDefaultDashboardRoute(role as UserRoles));
-  }
-
-  if (role === "USER" && pathname.startsWith("/dashboard")) {
-    return redirect(unauthorized);
-  }
-
-  if (isProtectedRoute(pathname) && !role) {
-    return redirect("/login");
-  }
-
-  if (isProtectedRoute(pathname) && role) {
+  if (isEmailVerifyRoute(pathname)) {
     if (!isVerified) {
-      const verifyUrl = new URL("/email-verify", request.url);
-      verifyUrl.searchParams.set("email", user?.email || "");
-      return NextResponse.redirect(verifyUrl);
-    }
+      if (!role) return redirect("/login");
+      return NextResponse.next();
+    } else return redirect(getDefaultDashboardRoute(role as UserRoles));
   }
 
-  if (isPublicRoute(pathname)) return NextResponse.next();
+  if (!role) return redirect("/login");
+  if (!isVerified) return redirect("/email-verify");
 
-  return redirect("/");
+  if (owner === "PROTECTED" || owner === "USER") return NextResponse.next();
+  if (owner === "ADMIN" && isPermittedToAdminDashboard(role)) {
+    return NextResponse.next();
+  }
+
+  return redirect("/unauthorized");
 }
 
 //
