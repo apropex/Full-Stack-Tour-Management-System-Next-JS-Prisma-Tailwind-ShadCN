@@ -3,6 +3,8 @@
 import { envChecker } from "@/utils/env-checker";
 
 interface EnvConfig {
+  BASE_URL: string;
+
   DATABASE_URL: string;
 
   BCRYPT_SALT_ROUND: number;
@@ -35,6 +37,8 @@ interface EnvConfig {
 
 // === 1. Raw env values ===
 const rawEnv = {
+  BASE_URL: process.env.BASE_URL,
+
   DATABASE_URL: process.env.DATABASE_URL,
 
   BCRYPT_SALT_ROUND: process.env.BCRYPT_SALT_ROUND,
@@ -76,6 +80,8 @@ export const ENV = (() => {
   validateEnv();
 
   return {
+    BASE_URL: process.env.BASE_URL!,
+
     DATABASE_URL: process.env.DATABASE_URL!,
 
     BCRYPT_SALT_ROUND: Number(process.env.BCRYPT_SALT_ROUND!),
